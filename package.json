@@ -5,7 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev" : "nodemon index.js"
+    "dev": "nodemon index.js",
+    "mg" : "npx sequelize-cli migration:generate --name",
+    "mg_run" : "npx sequelize-cli db:migrate",
+    "mg_undo" : "npx sequelize-cli db:migrate:undo",
+    "mg_del" : "npx sequelize-cli db:migrate:undo:all"
   },
   "author": "",
   "license": "ISC",
@@ -20,5 +24,8 @@
     "pg": "^8.17.2",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.7"
+  },
+  "devDependencies": {
+    "sequelize-cli": "^6.6.5"
   }
 }
