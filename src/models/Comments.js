@@ -7,16 +7,16 @@ module.exports = (sequelize, DataTypes) => {
                 primaryKey : true,
                 autoIncrement : true,
             },
+            report_id : {
+                type : DataTypes.INTEGER,
+                allowNull : false,
+            },
             isi_komentar : {
                 type : DataTypes.TEXT,
                 allowNull : false,
                 validate : {
                     notEmpty : true,
                 },
-            },
-            report_id : {
-                type : DataTypes.INTEGER,
-                allowNull : false,
             },
             user_id : {
                 type : DataTypes.INTEGER,
