@@ -1,5 +1,5 @@
 const { Class } = require("../models");
-
+// tambahkan validasi atau keamanan ketika masukkan tingkat dan jurusan
 exports.createClass = async (req, res) => {
     try {
         const { nama_kelas, tingkat, jurusan } = req.body;
@@ -30,7 +30,7 @@ exports.createClass = async (req, res) => {
         });
     }
 };
-
+// 🔥🔥
 exports.getAllClass = async (req, res) => {
     try {
         const classes = await Class.findAll();
