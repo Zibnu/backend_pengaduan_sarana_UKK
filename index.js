@@ -9,14 +9,11 @@
     app.use(express.json());
     app.use(express.urlencoded({extended : true}));
 
-    // (async () => {
-    //     try {
-    //         await sequelize.authenticate();
-    //         console.log("Connected SUCCESS");
-    //     } catch (error) {
-    //         console.error("Failed", error);
-    //     }
-    // })();
+    const authRoutes = require("./src/routes/authRoutes");
+    const classRoutes = require("./src/routes/classRoutes");
+
+    app.use("/api/auth", authRoutes);
+    app.use("/api/class", classRoutes);
 
     app.get("/", (req, res) => {
         res.json({

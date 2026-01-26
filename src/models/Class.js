@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey : "class_id",
             as : "students",
         });
-        Class.hasMany(models.Report, {
+        Class.hasMany(models.Reports, {
             foreignKey : "class_id",
             as : "reports",
         });

@@ -47,12 +47,12 @@ module.exports = (sequelize, DataTypes) => {
             as : "class",
         });
 
-        User.hasMany(models.Report, {
+        User.hasMany(models.Reports, {
             foreignKey : "user_id",
             as : "reports",
         });
 
-        User.hasMany(models.Comment, {
+        User.hasMany(models.Comments, {
             foreignKey : "user_id",
             as : "comments",
         });
