@@ -10,6 +10,21 @@ exports.createClass = async (req, res) => {
             });
         }
 
+        if(![10,11,12].includes(Number(tingkat))){
+            return res.status(401).json({
+                success : false,
+                message : "Tingkat must be 10, 11, 12",
+            });
+        }
+
+        const allowedJurusan = ["PPLG", "TO", "RPL", "PG", "TSM", "TOT"];
+        if(!allowedJurusan.includes(jurusan)){
+            return res.status(401).json({
+                success : false,
+                message : `Allowed jurusan : ${allowedJurusan.join(", ")}`,
+            });
+        }
+
         const newClass = await Class.create({
             nama_kelas,
             tingkat,
