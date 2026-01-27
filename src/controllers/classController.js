@@ -64,3 +64,59 @@ exports.getAllClass = async (req, res) => {
         });
     }
 };
+// 🔥🔥
+exports.getClassById = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const classData = await Class.findByPk(id);
+
+        if(!classData){
+            return res.status(404).json({
+                success : false,
+                message : "Class Not Found",
+            });
+        }
+
+        return res.status(200).json({
+            success : true,
+            message : "Get Class By Id Success",
+            data : classData,
+        });
+    } catch (error) {
+        console.error("Get Class By Id Error", error);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error",
+            error : error.message,
+        });
+    }
+}
+// 🔥🔥
+exports.deleteClass = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const classData = await Class.findByPk(id);
+        if(!classData) {
+            return res.status(404).json({
+                success : false,
+                message : "Class Not Found",
+            });
+        }
+
+        await classData.destroy();
+
+        return res.status(200).json({
+            success : true,
+            message : "Delete Class Success",
+        });
+    } catch (error) {
+        console.error("Delete Class Error", error);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error",
+            error : error.message,
+        });
+    }
+}

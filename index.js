@@ -11,9 +11,14 @@
 
     const authRoutes = require("./src/routes/authRoutes");
     const classRoutes = require("./src/routes/classRoutes");
+    const roomRoutes = require("./src/routes/roomRoutes");
+    const categoryRoutes = require("./src/routes/categoryRoutes");
+
 
     app.use("/api/auth", authRoutes);
     app.use("/api/class", classRoutes);
+    app.use("/api/room", roomRoutes);
+    app.use("/api/category", categoryRoutes);
 
     app.get("/", (req, res) => {
         res.json({
