@@ -13,7 +13,7 @@ exports.createCategory = async ( req, res ) => {
         }
 
         const existingCategory = await Categories.findOne({ where : { nama_kategori } });
-        if(!existingCategory) {
+        if(existingCategory) {
             return res.status(409).json({
                 success : false,
                 message : "Category Already Exists",
@@ -41,16 +41,15 @@ exports.getAllCategories = async ( req, res ) => {
     try {
         const { page = 1, limit = 7, search, from, to} = req.query;
 
-        const offset = (page - 1) * limit;
         const where = {};
-
+        
         // search by name
         if(search) {
             where.nama_kategori = {
                 [Op.iLike] : `%${search}%`,
             };
         }
-
+        
         // filter by date
         if( from && to) {
             where.createdAt = {
@@ -58,10 +57,12 @@ exports.getAllCategories = async ( req, res ) => {
             };
         }
 
+        const offset = (parseInt(page) - 1) * parseInt(limit);
+
         const { count, rows } = await Categories.findAndCountAll({
             where,
             limit : parseInt(limit),
-            offset : parseInt(offset),
+            offset,
             order : [["createdAt", "DESC"]],
         });
 
@@ -70,9 +71,11 @@ exports.getAllCategories = async ( req, res ) => {
             message : "Get All Categories Success",
             data : rows,
             pagination : {
-                total : count,
-                page : parseInt(page),
-                totalPage : Math.ceil(count / limit),
+                currentPage : parseInt(page),
+                totalPages : Math.ceil(count / parseInt(limit)),
+                totalItems : count,
+                itemsPerPage : parseInt(limit),
+                currentItems : rows.length
             },
         });
     } catch (error) {
