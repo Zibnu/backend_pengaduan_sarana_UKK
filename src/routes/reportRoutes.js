@@ -6,6 +6,7 @@ const upload = require("../middleware/uploadMiddleware");
 
 router.post("/create_report", authenticate, upload.single("foto"), reportController.createReport);
 router.get("/my_reports", authenticate, reportController.getMyReports);
-router.get("/detail_report", authenticate, reportController.getMyReportDetail);
+router.get("/detail_report/:id", authenticate, reportController.getMyReportDetail);
+router.get("/my_dashboard", authenticate, reportController.getMyDashboard);
 
 module.exports = router;

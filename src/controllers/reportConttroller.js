@@ -1,4 +1,4 @@
-const { Reports, Categories, Room, Class, User, Notifications, Comment} = require("../models");
+const { Reports, Categories, Room, Class, User, Notifications, Comments} = require("../models");
 // 🔥🔥
 exports.createReport = async (req, res) => {
     try {
@@ -118,7 +118,7 @@ exports.getMyReports = async (req, res) => {
     }
 };
 // Digunakan untuk ketika di halaman detail report agar user bisa melihat detail reportnya
-// 
+// 🔥🔥
 exports.getMyReportDetail = async (req, res) => {
     try {
         const { id } = req.params;
@@ -130,22 +130,22 @@ exports.getMyReportDetail = async (req, res) => {
                 { 
                     model : Room,
                     as : "room",
-                    // attributes : ["id_room", "nama_ruang", "tipe"],
+                    attributes : ["id_room", "nama_ruang", "tipe"],
                 },
                 {
                     model : Categories,
                     as : "category",
-                    // attributes : ["id_category", "nama_kategori"],
+                    attributes : ["id_category", "nama_kategori"],
                 },
                 {
                     model : Class,
                     as : "class",
-                    // attributes : ["id_class", "nama_kelas", "tingkat", "jurusan"],
+                    attributes : ["id_class", "nama_kelas", "tingkat", "jurusan"],
                 },
                 {
-                    model : Comment,
+                    model : Comments,
                     as : "comments",
-                    // attributes : ["id_comments", "isi_komentar", "report_id", "user_id"],
+                    attributes : ["id_comments", "isi_komentar", "report_id", "user_id", "createdAt", "updatedAt"],
                 },
             ],
         });
@@ -171,3 +171,34 @@ exports.getMyReportDetail = async (req, res) => {
         });
     }
 };
+// 🔥🔥
+exports.getMyDashboard = async (req, res) => {
+    try {
+        const userId = req.user.id_user;
+
+        const total = await Reports.count({ where : {user_id : userId} });
+        const menunggu = await Reports.count({ where : {user_id : userId, status : "menunggu"} });
+        const diproses = await Reports.count({ where : { user_id : userId, status : "diproses"} });
+        const selesai = await Reports.count({ where : {user_id : userId, status : "selesai"}});
+        const ditolak = await Reports.count({ where : { user_id : userId, status : "ditolak"}});
+
+        return res.status(200).json({
+            success : true,
+            message : "Get My Dashboard success",
+            data : {
+                totalReport : total,
+                totalMenunggu : menunggu,
+                totalDiProses : diproses,
+                totalSelesai : selesai,
+                totalDitolak : ditolak,
+            },
+        });
+    } catch (error) {
+        console.error("Get My Dashboard Error", error);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error",
+            error : error.message,
+        });
+    }
+}
