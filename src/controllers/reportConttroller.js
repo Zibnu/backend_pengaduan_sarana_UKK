@@ -1,5 +1,5 @@
-const { Reports, Categories, Room, Class, User, Notifications} = require("../models");
-
+const { Reports, Categories, Room, Class, User, Notifications, Comment} = require("../models");
+// 🔥🔥
 exports.createReport = async (req, res) => {
     try {
         const { judul, deskripsi, prioritas, room_id, category_id } = req.body;
@@ -63,6 +63,110 @@ exports.createReport = async (req, res) => {
         return res.status(500).json({
             success : false,
             message : "Internal Server Error",
+            error : error.message,
+        });
+    }
+};
+// 🔥🔥 untuk mendapatkan semua data report
+exports.getMyReports = async (req, res) => {
+    try {
+        const userId = req.user.id_user;
+        const { status, page = 1, limit = 10} = req.query;
+
+        const where = { user_id : userId};
+        if(status) where.status = status;
+
+        const offset = (page - 1) * limit;
+
+        const { count, rows } = await Reports.findAndCountAll({
+            where,
+            include : [
+                {
+                    model : Room,
+                    as : "room",
+                    attributes : ["id_room", "nama_ruang", "tipe"],
+                },
+                {
+                    model : Categories,
+                    as : "category",
+                    attributes : ["id_category", "nama_kategori"],
+                },
+            ],
+            order : [["createdAt", "DESC"]],
+            limit : parseInt(limit),
+            offset : parseInt(offset),
+        });
+
+        return res.status(200).json({
+            success : true,
+            message : "Get My Report Success",
+            data : rows,
+            pagination : {
+                currentPage : parseInt(page),
+                totalPage : Math.ceil(count / parseInt(limit)),
+                totalItems : count,
+                itemsPerPage : parseInt(limit),
+            },
+        });
+    } catch (error) {
+        console.error("Get My Report Error", error);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error",
+            error : error.message,
+        });
+    }
+};
+// Digunakan untuk ketika di halaman detail report agar user bisa melihat detail reportnya
+// 
+exports.getMyReportDetail = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.id_user;
+
+        const report = await Reports.findOne({
+            where : {id_report : id, user_id : userId },
+            include : [
+                { 
+                    model : Room,
+                    as : "room",
+                    // attributes : ["id_room", "nama_ruang", "tipe"],
+                },
+                {
+                    model : Categories,
+                    as : "category",
+                    // attributes : ["id_category", "nama_kategori"],
+                },
+                {
+                    model : Class,
+                    as : "class",
+                    // attributes : ["id_class", "nama_kelas", "tingkat", "jurusan"],
+                },
+                {
+                    model : Comment,
+                    as : "comments",
+                    // attributes : ["id_comments", "isi_komentar", "report_id", "user_id"],
+                },
+            ],
+        });
+
+        if(!report) {
+            return res.status(4040).json({
+                success : false,
+                message : "Report Not Found",
+            });
+        }
+
+        return res.status(200).json({
+            success : true,
+            message : "Get My Report Detail",
+            data : report,
+        });
+    } catch (error) {
+        console.error("Get My Report Detail Error", error);
+        return res.status(500).json({
+            success : false,
+            message : "Intenal Server Error",
             error : error.message,
         });
     }
