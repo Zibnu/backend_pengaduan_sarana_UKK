@@ -46,10 +46,12 @@ exports.createReport = async (req, res) => {
             category_id,
         });
 
+        const admin = await User.findOne({ where : { role : "admin"}})
+
         await Notifications.create({
-            message : "Laporan Berhasil dikirim",
+            message : "Laporan Baru Dari Siswa",
             is_read : false,
-            user_id : userId,
+            user_id : admin.id_user,
             report_id : report.id_report,
         });
 
@@ -201,4 +203,100 @@ exports.getMyDashboard = async (req, res) => {
             error : error.message,
         });
     }
-}
+};
+// Membalas komentar dari admin
+exports.replyComment = async ( req, res) => {
+    try {
+        const { report_id, isi_komentar } = req.body;
+        const userId = req.user.id_user;
+
+        if(!report_id || !isi_komentar) {
+            return res.status(400).json({
+                success : false,
+                message : "Your input is null",
+            });
+        }
+
+        const comment = await Comments.create({
+            report_id,
+            user_id : userId,
+            isi_komentar,
+        });
+
+        const admin = await User.findOne({ where : { role : "admin"}});
+
+        await Notifications.create({
+            user_id : admin.id_user,
+            report_id,
+            message : "siswa Membalas Komentar",
+            is_read : false,
+        });
+
+        return res.status(201).json({
+            success : true,
+            message : "Reply Comment Success",
+            data : comment,
+        });
+    } catch (error) {
+        console.error("Reply Comment Error", error);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error",
+            error : error.message,
+        });
+    }
+};
+
+// untuk mengedit report sebelum status berubah dari menunggu ke status yang lain
+exports.updateMyReport = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { judul, deskripsi, prioritas, room_id, category_id } = req.body;
+        const userId = req.user.id_user;
+
+        const report = await Reports.findOne({ where : { id_report : id, user_id : userId} });
+
+        if(!report) {
+            return res.status(404).json({
+                success : false,
+                message : "Report not found",
+            });
+        }
+
+        if(report.status !== "menunggu") {
+            return res.status(403).json({
+                success : false,
+                message : "Status bukan menunggu tidak bisa diubah",
+            });
+        }
+
+        let foto = report.foto;
+        if(req.file) {
+            foto = `${req.protocol}://${req.get("host")}/uploads/reports/${req.file.filename}`;
+        }
+
+        await report.update({ judul, deskripsi, foto, prioritas, room_id, category_id});
+
+        const admin = await User.findOne({ where : { role : "admin"} });
+
+        await Notifications.create({
+            user_id : admin.id_user,
+            report_id : report.id_report,
+            message : "Siswa memperbarui laporan",
+            is_read : false,
+        });
+
+        return res.status(201).json({
+            success : true,
+            message : "Update Report Success",
+            data : report
+        })
+    } catch (error) {
+        console.error("Update My Report Error", error);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error",
+            error : error.message,
+        });
+    }
+};
