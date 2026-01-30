@@ -13,6 +13,13 @@ exports.createReport = async (req, res) => {
                 message : "Your Input Is Null",
             });
         }
+        const allowedPrioritas = ["rendah", "sedang", "tinggi"];
+        if(!allowedPrioritas.includes(prioritas)) {
+            return res.status(403).json({
+                success : false,
+                message : `Prioritas Allowed : ${allowedPrioritas}`,
+            });
+        }
 
         const room = await Room.findByPk(room_id);
         const category = await Categories.findByPk(category_id);
@@ -417,6 +424,112 @@ exports.getReportDetail = async (req, res) => {
         });
     } catch (error) {
         console.error("Get Report Detail Error", error);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error",
+            error : error.message,
+        });
+    }
+};
+// update status report by admin 🔥🔥
+exports.updateStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        if(!status) {
+            return res.status(400).json({
+                success : false,
+                message : "Your Input is Null",
+            });
+        }
+
+        const report = await Reports.findByPk(id);
+        if(!report) {
+            return res.status(404).json({
+                success : false,
+                message : "Report Not Found",
+            });
+        }
+
+        const allowedStatus = ["menunggu", "diproses", "selesai", "ditolak"];
+        if(!allowedStatus.includes(status)) {
+            return res.status(403).json({
+                success : false,
+                message : `Update Status Allowed : ${allowedStatus}`,
+            });
+        }
+
+        await report.update({ status });
+
+        await Notifications.create({
+            user_id : report.user_id,
+            report_id : report.id_report,
+            message : `Status Report Update to be ${status}`,
+            is_read : false,
+        });
+
+        return res.status(200).json({
+            success : true,
+            message : "Update Status Success",
+            data : report,
+        });
+    } catch (error) {
+        console.error("Update Status Error", error);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error",
+            error : error.message,
+        });
+    }
+};
+// update prioritas oleh admin 🔥🔥
+exports.updatePriority = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { prioritas } = req.body;
+
+        if(!prioritas) {
+            return res.status(400).json({
+                success : false,
+                message : "Your Input is Null",
+            });
+        }
+
+        const report = await Reports.findByPk(id);
+        if(!report) {
+            return res.status(404).json({
+                success : false,
+                message : "Report Not Found",
+            });
+        }
+
+        const allowedPrioritas = ["rendah", "sedang", "tinggi"];
+        if(!allowedPrioritas.includes(prioritas)) {
+            return res.status(403).json({
+                success : false,
+                message : `Prioritas allowed Update : ${allowedPrioritas}`,
+            });
+        }
+
+        await report.update({ prioritas });
+
+        const reportRes = {
+            id_report : report.id_report,
+            judul : report.judul,
+            deskripsi : report.deskripsi,
+            foto : report.foto,
+            prioritas : report.prioritas,
+            status : report.status,
+        };
+
+        return res.status(200).json({
+            success : true,
+            message : "Update Priority Success",
+            data : reportRes,
+        });
+    } catch (error) {
+        console.error("Update Priority Error", error);
         return res.status(500).json({
             success : false,
             message : "Internal Server Error",

@@ -15,6 +15,8 @@ router.put("/update_report/:id", authenticate, upload.single("foto"), reportCont
 // admin
 router.get("/all_reports", authenticate, isAdmin, reportController.getAllReports);
 router.get("/report_detail/:id", authenticate, isAdmin, reportController.getReportDetail);
+router.patch("/update_status/:id", authenticate, isAdmin, reportController.updateStatus);
+router.patch("/update_prioritas/:id", authenticate, isAdmin, reportController.updatePriority);
 
 
 module.exports = router;
