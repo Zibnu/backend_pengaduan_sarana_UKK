@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const { Reports, Categories, Room, Class, User, Notifications, Comments} = require("../models");
 // 🔥🔥
 exports.createReport = async (req, res) => {
@@ -248,6 +249,7 @@ exports.replyComment = async ( req, res) => {
 };
 
 // untuk mengedit report sebelum status berubah dari menunggu ke status yang lain
+// 🔥🔥
 exports.updateMyReport = async (req, res) => {
     try {
         const { id } = req.params;
@@ -293,6 +295,128 @@ exports.updateMyReport = async (req, res) => {
         })
     } catch (error) {
         console.error("Update My Report Error", error);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error",
+            error : error.message,
+        });
+    }
+};
+
+// Admin Controller 
+// 🔥🔥
+exports.getAllReports = async (req, res) => {
+    try {
+        const { page = 1, limit = 10, status, prioritas, search } = req.query;
+        const offset = (page - 1) * limit;
+
+        const where = {};
+        if(status) where.status = status;
+        if(prioritas) where.prioritas = prioritas;
+        if(search) {
+            where.judul = { [Op.iLike] : `%${search}%`};
+        }
+
+        const {count, rows} = await Reports.findAndCountAll({
+            where,
+            include : [
+                {
+                    model : User,
+                    as : "user",
+                    attributes : ["id_user", "nama"],
+                },
+                {
+                    model : Categories,
+                    as : "category",
+                    attributes : ["nama_kategori"],
+                },
+                {
+                    model : Room,
+                    as : "room",
+                    attributes : ["nama_ruang"],
+                },
+            ],
+            limit : parseInt(limit),
+            offset,
+            order : [["createdAt", "DESC"]],
+        });
+
+        return res.status(200).json({
+            success : true,
+            message : "Get All Reports Success",
+            data : rows,
+            pagination : {
+                currentPage : parseInt(page),
+                totalPages : Math.ceil(count / parseInt(limit)),
+                totalItems : count,
+                itemsPerPage : parseInt(limit),
+            },
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error",
+            error : error.message,
+        });
+    }
+};
+// 🔥🔥
+exports.getReportDetail = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const report = await Reports.findByPk(id, {
+            include : [
+                {
+                    model : User,
+                    as : "user",
+                    attributes : ["nama", "nis"],
+                },
+                {
+                    model : Categories,
+                    as : "category",
+                    attributes : ["nama_kategori"],
+                },
+                {
+                    model : Room,
+                    as : "room",
+                    attributes : ["nama_ruang"],
+                },
+                {
+                    model : Class,
+                    as : "class",
+                    attributes : ["nama_kelas"]
+                },
+                {
+                    model : Comments,
+                    as : "comments",
+                    attributes : ["isi_komentar"],
+                    include : [
+                        {
+                            model : User,
+                            as : "user",
+                            attributes : ["nama", "nis"],
+                        },
+                    ],
+                },
+            ],
+        });
+
+        if(!report) {
+            return res.status(404).json({
+                success : false,
+                message : "Report Not Found",
+            });
+        }
+
+        return res.status(200).json({
+            success : true,
+            message : "Get Report Detail Success",
+            data : report,
+        });
+    } catch (error) {
+        console.error("Get Report Detail Error", error);
         return res.status(500).json({
             success : false,
             message : "Internal Server Error",
