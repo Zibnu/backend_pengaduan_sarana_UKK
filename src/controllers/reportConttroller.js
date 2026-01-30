@@ -212,7 +212,7 @@ exports.getMyDashboard = async (req, res) => {
         });
     }
 };
-// Membalas komentar dari admin
+// Membalas komentar dari admin 🔥🔥
 exports.replyComment = async ( req, res) => {
     try {
         const { report_id, isi_komentar } = req.body;
@@ -537,3 +537,82 @@ exports.updatePriority = async (req, res) => {
         });
     }
 };
+// Create Comment admin 🔥🔥
+exports.addComment = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { isi_komentar } = req.body;
+        const adminId = req.user.id_user;
+
+        const report = await Reports.findByPk(id);
+        if(!report) {
+            return res.status(404).json({
+                success : false,
+                message : "Data Report Not Found",
+            });
+        }
+
+        const comment = await Comments.create({
+            report_id : id,
+            isi_komentar,
+            user_id : adminId,
+        });
+
+        await Notifications.create({
+            user_id : report.user_id,
+            report_id : id,
+            message : "Admin telah membalas laporan",
+            is_read : false,
+        });
+
+        return res.status(200).json({
+            success : true,
+            message : "Add Comment Success",
+            data : comment,
+        });
+    } catch (error) {
+        console.error(" Add Comment Error", error);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error",
+            error : error.message,
+        });
+    }
+};
+// get statistik report by admin 🔥🔥
+exports.getDashboardStats = async (req, res) => {
+    try {
+        const total = await Reports.count();
+        const menunggu = await Reports.count({ where : { status : "menunggu" }});
+        const diproses = await Reports.count({ where : { status : "diproses" }});
+        const selesai = await Reports.count({ where : { status : "selesai" }});
+        const ditolak = await Reports.count({ where : { status : "ditolak" }});
+
+        return res.status(200).json({
+            success : true,
+            message : "Get Dashboard Statistic Success",
+            data : {
+                total,
+                menunggu,
+                diproses,
+                selesai,
+                ditolak,
+            },
+        });
+    } catch (error) {
+        console.error("Get Dashboard Statistic Error", error);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error",
+            error : error.message,
+        });
+    }
+};
+
+exports.exportReportPdf = async (req, res) => {
+    try {
+        
+    } catch (error) {
+        
+    }
+}
