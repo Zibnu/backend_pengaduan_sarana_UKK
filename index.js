@@ -15,6 +15,7 @@
     const roomRoutes = require("./src/routes/roomRoutes");
     const categoryRoutes = require("./src/routes/categoryRoutes");
     const reportRoutes = require("./src/routes/reportRoutes");
+    const commentRoutes = require("./src/routes/commentRoutes");
 
 
     app.use("/api/auth", authRoutes);
@@ -22,6 +23,7 @@
     app.use("/api/room", roomRoutes);
     app.use("/api/category", categoryRoutes);
     app.use("/api/report", reportRoutes);
+    app.use("/api/comment", commentRoutes);
 
     app.get("/", (req, res) => {
         res.json({
