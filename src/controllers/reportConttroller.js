@@ -1,5 +1,7 @@
 const { Op } = require("sequelize");
 const { Reports, Categories, Room, Class, User, Notifications, Comments} = require("../models");
+const PDFdocument = require("pdfkit");
+
 // 🔥🔥
 exports.createReport = async (req, res) => {
     try {
@@ -609,10 +611,78 @@ exports.getDashboardStats = async (req, res) => {
     }
 };
 
+// export pdf admin 🔥🔥
 exports.exportReportPdf = async (req, res) => {
     try {
-        
+        const reports = await Reports.findAll({
+            include : [
+                {
+                    model : User,
+                    as : "user",
+                    attributes : ["nama"],
+                },
+                {
+                    model : Room,
+                    as : "room",
+                    attributes : ["nama_ruang"],
+                },
+                {
+                    model : Class,
+                    as : "class",
+                    attributes : ["nama_kelas"],
+                },
+                {
+                    model : Categories,
+                    as : "category",
+                    attributes : ["nama_kategori"],
+                },
+            ],
+            order : [["createdAt", "DESC"]],
+        });
+
+        // create dokumen PDF
+        const doc = new PDFdocument({ margin : 40, size : "A4"});
+
+        // set Header Response
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", "attachment; filename=reports.pdf");
+
+        // stream PDF ke response
+        doc.pipe(res);
+
+        // Judul
+        doc.fontSize(16).text("Laporan Pengaduan Sarana", {
+            align : "center",
+        });
+
+        doc.moveDown(2);
+
+        // isi Data
+        reports.forEach((report, index) => {
+            doc
+            .fontSize(12)
+            .text(`No Report : ${index + 1}`)
+            .text(`Judul : ${report.judul}`)
+            .text(`Deskripsi : ${report.deskripsi}`)
+            .text(`Status : ${report.status}`)
+            .text(`Prioritas : ${report.prioritas}`)
+            .text(`Pelapor : ${report.user?.nama || "-"}`)
+            .text(`Ruang : ${report.room?.nama_ruang || "-"}`)
+            .text(`Kelas : ${report.class?.nama_kelas || "-"}`)
+            .text(`Kategori : ${report.categories?.nama_kategori || "-"}`)
+            .text(`Tanggal : ${report.createdAt.toISOString().split("T")[0]}`);
+
+            doc.moveDown();
+            doc.moveTo(40, doc.y).lineTo(550, doc.y).stroke();
+            doc.moveDown();
+        });
+        doc.end(); //selesai
     } catch (error) {
-        
+        console.error("Export Report Pdf Error", error);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error",
+            error : error.message,
+        });
     }
-}
+};
