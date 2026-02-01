@@ -16,6 +16,7 @@
     const categoryRoutes = require("./src/routes/categoryRoutes");
     const reportRoutes = require("./src/routes/reportRoutes");
     const commentRoutes = require("./src/routes/commentRoutes");
+    const notificationRoutes = require("./src/routes/notificationRoutes");
 
 
     app.use("/api/auth", authRoutes);
@@ -24,6 +25,7 @@
     app.use("/api/category", categoryRoutes);
     app.use("/api/report", reportRoutes);
     app.use("/api/comment", commentRoutes);
+    app.use("/api/notif", notificationRoutes);
 
     app.get("/", (req, res) => {
         res.json({
