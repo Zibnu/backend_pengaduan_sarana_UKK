@@ -669,7 +669,7 @@ exports.exportReportPdf = async (req, res) => {
             .text(`Pelapor : ${report.user?.nama || "-"}`)
             .text(`Ruang : ${report.room?.nama_ruang || "-"}`)
             .text(`Kelas : ${report.class?.nama_kelas || "-"}`)
-            .text(`Kategori : ${report.categories?.nama_kategori || "-"}`)
+            .text(`Kategori : ${report.category?.nama_kategori || "-"}`)
             .text(`Tanggal : ${report.createdAt.toISOString().split("T")[0]}`);
 
             doc.moveDown();
