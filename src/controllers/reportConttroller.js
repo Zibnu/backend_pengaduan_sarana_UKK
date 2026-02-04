@@ -1,5 +1,5 @@
-const { Op } = require("sequelize");
-const { Reports, Categories, Room, Class, User, Notifications, Comments} = require("../models");
+const { Op, where } = require("sequelize");
+const { Reports, Categories, Room, Class, User, Notifications, Comments, Sequelize} = require("../models");
 const PDFdocument = require("pdfkit");
 
 // 🔥🔥
@@ -41,7 +41,7 @@ exports.createReport = async (req, res) => {
 
         let foto = null;
         if(req.file) {
-            foto = `${req.protocol}://${req.get("host")}/uploads/reports/${req.file.filename}`;
+            foto = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
         }
 
         const report = await Reports.create({
@@ -283,7 +283,7 @@ exports.updateMyReport = async (req, res) => {
 
         let foto = report.foto;
         if(req.file) {
-            foto = `${req.protocol}://${req.get("host")}/uploads/reports/${req.file.filename}`;
+            foto = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
         }
 
         await report.update({ judul, deskripsi, foto, prioritas, room_id, category_id});
@@ -589,6 +589,25 @@ exports.getDashboardStats = async (req, res) => {
         const diproses = await Reports.count({ where : { status : "diproses" }});
         const selesai = await Reports.count({ where : { status : "selesai" }});
         const ditolak = await Reports.count({ where : { status : "ditolak" }});
+        const prioritasTinggi = await Reports.count({
+            where : { prioritas : "tinggi"},
+        });
+        const mostDamageKategori = await Reports.findAll({
+            attributes : [ 
+                "category_id",
+                [Sequelize.fn("COUNT", Sequelize.col("id_report")), "total_reports"],
+            ],
+            include : [
+                {
+                    model : Categories,
+                    as : "category",
+                    attributes : ["nama_kategori"],
+                },
+            ],
+            group : ["category_id", "category.id_category"],
+            having : Sequelize.literal("COUNT(id_report) > 5"),
+            order : [[Sequelize.literal("total_reports"), "DESC"]],
+        });
 
         return res.status(200).json({
             success : true,
@@ -599,6 +618,8 @@ exports.getDashboardStats = async (req, res) => {
                 diproses,
                 selesai,
                 ditolak,
+                prioritas_tinggi : prioritasTinggi,
+                most_damage_category : mostDamageKategori,
             },
         });
     } catch (error) {
