@@ -1,4 +1,5 @@
     const express = require("express");
+    const cors = require("cors");
     const app = express();
     const path = require("path");
     require("dotenv").config();
@@ -7,6 +8,9 @@
     const sequelize = require("./src/config/db");
 
     app.use(express.json());
+    app.use(cors({
+        origin : "http://localhost:5173"
+    }))
     app.use(express.urlencoded({extended : true}));
     app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
