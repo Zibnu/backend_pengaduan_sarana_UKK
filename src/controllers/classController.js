@@ -25,6 +25,14 @@ exports.createClass = async (req, res) => {
             });
         }
 
+        const existingClass = await Class.findOne({ where : { nama_kelas : nama_kelas}})
+        if(existingClass) {
+            return res.status(403).json({
+                success : false,
+                message : "Nama Class Al Ready Exist"
+            })
+        }
+
         const newClass = await Class.create({
             nama_kelas,
             tingkat,
