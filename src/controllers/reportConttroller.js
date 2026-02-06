@@ -200,7 +200,7 @@ exports.getMyDashboard = async (req, res) => {
             data : {
                 totalReport : total,
                 totalMenunggu : menunggu,
-                totalDiProses : diproses,
+                totalDiproses : diproses,
                 totalSelesai : selesai,
                 totalDitolak : ditolak,
             },

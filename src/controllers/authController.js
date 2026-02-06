@@ -1,6 +1,6 @@
     const bcrypt = require("bcrypt");
     const jwt = require("jsonwebtoken");
-    const { User } = require("../models");
+    const { User, Class } = require("../models");
 
     const SECRET = process.env.SECRET_KEYS;
     const expired = "7d"
@@ -47,7 +47,7 @@
                     succces : true,
                     message : "Login Success",
                     token,
-                    user : {
+                    data : {
                         id_user : user.id_user,
                         nama : user.nama,
                         nis : user.nis,
@@ -113,6 +113,44 @@
             console.error("Register Error", error);
             return res.status(500).json({
                 success : false,
+                message : "Internal Server Error",
+                error : error.message,
+            });
+        }
+    };
+
+    // Get Data Profile
+    exports.getMyData = async (req, res) => {
+        try {
+            const userId = req.user.id_user;
+
+            const user = await User.findByPk(userId, {
+                attributes : ["id_user", "nama", "nis"],
+                include : [
+                    {
+                        model : Class,
+                        as : "class",
+                        attributes : ["nama_kelas"],
+                    },
+                ],
+            });
+
+            if(!user) {
+                return res.status(404).json({
+                    success : false,
+                    message : "User Not Found",
+                });
+            }
+
+            return res.status(200).json({
+                succces : true,
+                message : "Get My Data Success",
+                data : user,
+            });
+        } catch (error) {
+            console.error("Get My Data ERROR", error);
+            return res.status(500).json({
+                succces : false,
                 message : "Internal Server Error",
                 error : error.message,
             });
