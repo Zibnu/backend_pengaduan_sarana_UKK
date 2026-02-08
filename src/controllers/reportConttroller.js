@@ -83,7 +83,7 @@ exports.createReport = async (req, res) => {
 exports.getMyReports = async (req, res) => {
     try {
         const userId = req.user.id_user;
-        const { status, page = 1, limit = 10} = req.query;
+        const { status, page = 1, limit = 5} = req.query;
 
         const where = { user_id : userId};
         if(status) where.status = status;

@@ -1,4 +1,4 @@
-const { Notifications, Reports } = require("../models");
+const { Notifications, Reports, Comments } = require("../models");
 
 // get notif by user 🔥🔥
 exports.getMyNotifications = async (req, res) => {
@@ -10,11 +10,21 @@ exports.getMyNotifications = async (req, res) => {
 
         const {count , rows } = await Notifications.findAndCountAll({
             where : { user_id : userId},
+            distinct : true,
             include : [
                 {
                     model : Reports,
                     as : "report",
                     attributes : ["id_report" , "judul" , "status", "prioritas"],
+                    include : [
+                        {
+                            model : Comments,
+                            as : "comments",
+                            attributes : ["isi_komentar"],
+                            separate : true,
+                            order : [["createdAt", "DESC"]],
+                        },
+                    ],
                 },
             ],
             order : [["createdAt", "DESC"]],
