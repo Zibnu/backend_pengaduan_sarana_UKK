@@ -467,7 +467,7 @@ exports.updateStatus = async (req, res) => {
         await Notifications.create({
             user_id : report.user_id,
             report_id : report.id_report,
-            message : `Status Report Update to be ${status}`,
+            message : `Status Report Update to be ${status} by Admin`,
             is_read : false,
         });
 
@@ -515,6 +515,13 @@ exports.updatePriority = async (req, res) => {
         }
 
         await report.update({ prioritas });
+
+        await Notifications.create({
+            user_id : report.user_id,
+            report_id : report.id_report,
+            message : `Priority Update to be ${prioritas} by Admin`,
+            is_read : false,
+        });
 
         const reportRes = {
             id_report : report.id_report,

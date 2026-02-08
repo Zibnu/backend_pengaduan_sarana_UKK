@@ -4,23 +4,34 @@ const { Notifications, Reports } = require("../models");
 exports.getMyNotifications = async (req, res) => {
     try {
         const userId = req.user.id_user;
+        const { page = 1, limit = 5} = req.query;
 
-        const notifications = await Notifications.findAll({
+        const offset = (page - 1) * limit;
+
+        const {count , rows } = await Notifications.findAndCountAll({
             where : { user_id : userId},
             include : [
                 {
                     model : Reports,
                     as : "report",
-                    attributes : ["id_report" , "judul" , "status"],
+                    attributes : ["id_report" , "judul" , "status", "prioritas"],
                 },
             ],
-            order : [["createdAt", "DESC"]]
+            order : [["createdAt", "DESC"]],
+            limit : parseInt(limit),
+            offset : parseInt(offset),
         });
 
         return res.status(200).json({
             success : true,
             message : "Get My Notifications Success",
-            data : notifications,
+            data : rows,
+            pagination : {
+                currentPage : parseInt(page),
+                totalPage : Math.ceil(count / parseInt(limit)),
+                totalItems : count,
+                itemsPerPage : parseInt(limit),
+            },
         });
     } catch (error) {
         console.error("Get My Notification Error", error);
