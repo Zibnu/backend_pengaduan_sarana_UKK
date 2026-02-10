@@ -596,16 +596,17 @@ exports.addComment = async (req, res) => {
     }
 };
 // get statistik report by admin 🔥🔥
-exports.getDashboardStats = async (req, res) => {
+exports.getDashboardAdmin = async (req, res) => {
     try {
-        const total = await Reports.count();
-        const menunggu = await Reports.count({ where : { status : "menunggu" }});
-        const diproses = await Reports.count({ where : { status : "diproses" }});
-        const selesai = await Reports.count({ where : { status : "selesai" }});
-        const ditolak = await Reports.count({ where : { status : "ditolak" }});
-        const prioritasTinggi = await Reports.count({
-            where : { prioritas : "tinggi"},
-        });
+        const [total, menunggu, diproses, selesai, ditolak, prioritasTinggi ] = await Promise.all([
+            Reports.count(),
+            Reports.count({where : {status : "menunggu"}}),
+            Reports.count({where : {status : "diproses"}}),
+            Reports.count({where : {status : "selesai"}}),
+            Reports.count({where : {status : "ditolak"}}),
+            Reports.count({where : {prioritas : "tinggi"}}),
+        ]);
+
         const mostDamageKategori = await Reports.findAll({
             attributes : [ 
                 "category_id",
@@ -623,6 +624,12 @@ exports.getDashboardStats = async (req, res) => {
             order : [[Sequelize.literal("total_reports"), "DESC"]],
         });
 
+        const latestReports = await Reports.findAll({
+            limit : 3,
+            order : [["createdAt", "DESC"]],
+            attributes : ["id_report", "judul"],
+        });
+
         return res.status(200).json({
             success : true,
             message : "Get Dashboard Statistic Success",
@@ -634,6 +641,7 @@ exports.getDashboardStats = async (req, res) => {
                 ditolak,
                 prioritas_tinggi : prioritasTinggi,
                 most_damage_category : mostDamageKategori,
+                latest_report : latestReports,
             },
         });
     } catch (error) {
