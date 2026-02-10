@@ -170,7 +170,7 @@ exports.getMyReportDetail = async (req, res) => {
         });
 
         if(!report) {
-            return res.status(4040).json({
+            return res.status(404).json({
                 success : false,
                 message : "Report Not Found",
             });
