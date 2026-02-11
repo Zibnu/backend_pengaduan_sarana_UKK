@@ -19,6 +19,6 @@ router.patch("/update_status/:id", authenticate, isAdmin, reportController.updat
 router.patch("/update_prioritas/:id", authenticate, isAdmin, reportController.updatePriority);
 router.post("/add_comment/:id", authenticate, isAdmin, reportController.addComment);
 router.get("/dashboard_admin", authenticate, isAdmin, reportController.getDashboardAdmin);
-router.get("/export_pdf", authenticate, isAdmin, reportController.exportReportPdf); 
+router.get("/export_pdf", reportController.exportReportPdf);
 
 module.exports = router;
