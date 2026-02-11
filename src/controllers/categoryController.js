@@ -12,8 +12,20 @@ exports.createCategory = async ( req, res ) => {
             });
         }
 
-        const existingCategory = await Categories.findOne({ where : { nama_kategori } });
+        const existingCategory = await Categories.findOne({ 
+            where : { nama_kategori },
+            paranoid : false,
+        });
         if(existingCategory) {
+            if(existingCategory.deletedAt) {
+                await existingCategory.restore();
+
+                return res.status(200).json({
+                    success : true,
+                    message : "Category Restored Success",
+                    data : existingCategory,
+                });
+            }
             return res.status(409).json({
                 success : false,
                 message : "Category Already Exists",

@@ -25,8 +25,20 @@ exports.createClass = async (req, res) => {
             });
         }
 
-        const existingClass = await Class.findOne({ where : { nama_kelas : nama_kelas}})
+        const existingClass = await Class.findOne({ 
+            where : { nama_kelas : nama_kelas},
+            paranoid : false,
+        })
         if(existingClass) {
+            if(existingClass.deletedAt) {
+                await existingClass.restore();
+
+                return res.status(200).json({
+                    success : true,
+                    message : "Restore Data Class Success",
+                    data : existingClass,
+                });
+            }
             return res.status(403).json({
                 success : false,
                 message : "Nama Class Al Ready Exist"
