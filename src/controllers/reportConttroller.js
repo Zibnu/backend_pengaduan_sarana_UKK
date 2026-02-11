@@ -407,12 +407,12 @@ exports.getReportDetail = async (req, res) => {
                 {
                     model : Comments,
                     as : "comments",
-                    attributes : ["isi_komentar"],
+                    attributes : ["id_comments","isi_komentar", "createdAt"],
                     include : [
                         {
                             model : User,
                             as : "user",
-                            attributes : ["nama", "nis"],
+                            attributes : ["id_user","nama", "role"],
                         },
                     ],
                 },
